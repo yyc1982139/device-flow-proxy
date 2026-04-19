@@ -46,17 +46,23 @@ function base64UrlEncode(data: ArrayBuffer): string {
     .replace(/=/g, '');
 }
 
-interface CacheEntry {
-  client_id?: string;
+export interface StateCacheEntry {
+  user_code: string;
+  timestamp: number;
+}
+
+export interface DeviceCacheEntry {
+  client_id: string;
   client_secret?: string;
   scope?: string;
-  device_code?: string;
-  pkce_verifier?: string;
-  user_code?: string;
+  device_code: string;
+  pkce_verifier: string;
   timestamp?: number;
   status?: 'pending' | 'complete';
   token_response?: unknown;
 }
+
+type CacheEntry = StateCacheEntry | DeviceCacheEntry;
 
 class CacheStore {
   private redis: Redis | null;
