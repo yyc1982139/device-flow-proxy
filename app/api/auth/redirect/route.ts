@@ -22,7 +22,7 @@ export async function GET(request: NextRequest) {
         { status: 400 }
       );
     }
-
+    // @ts-ignore
     const userCode = (stateData as any).user_code;
     const cache = await Cache.get(userCode);
 
