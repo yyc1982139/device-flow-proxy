@@ -47,11 +47,12 @@ function base64UrlEncode(data: ArrayBuffer): string {
 }
 
 interface CacheEntry {
-  client_id: string;
+  client_id?: string;
   client_secret?: string;
   scope?: string;
-  device_code: string;
-  pkce_verifier: string;
+  device_code?: string;
+  pkce_verifier?: string;
+  user_code?: string;
   timestamp?: number;
   status?: 'pending' | 'complete';
   token_response?: unknown;
