@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Cache } from '@/lib/cache';
 import { BASE_URL, TOKEN_ENDPOINT } from '@/lib/config';
+import { StateCacheEntry, DeviceCacheEntry } from '@/lib/cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -15,16 +16,16 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const stateData = await Cache.get(`state:${state}`);
+    const stateData = await Cache.get(`state:${state}`) as StateCacheEntry | null;
     if (!stateData) {
       return NextResponse.json(
         { error: 'Invalid State', error_description: 'The state parameter was invalid' },
         { status: 400 }
       );
     }
-    // @ts-ignore
-    const userCode = (stateData as any).user_code;
-    const cache = await Cache.get(userCode);
+
+    const userCode = stateData.user_code;
+    const cache = await Cache.get(userCode) as DeviceCacheEntry | null;
 
     if (!cache) {
       return NextResponse.json(
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
     await Cache.set(cache.device_code, {
       status: 'complete',
       token_response: tokenData,
-    }, 120);
+    } as DeviceCacheEntry, 120);
     await Cache.delete(userCode);
     await Cache.delete(`state:${state}`);
 
