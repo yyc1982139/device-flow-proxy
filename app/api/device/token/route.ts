@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Cache } from '@/lib/cache';
 import { LIMIT_REQUESTS_PER_MINUTE } from '@/lib/config';
+import { DeviceCacheEntry } from '@/lib/cache';
 
 export async function POST(request: NextRequest) {
   try {
@@ -34,7 +35,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const data = await Cache.get(deviceCode);
+    const data = await Cache.get(deviceCode) as DeviceCacheEntry | null;
 
     if (!data) {
       return NextResponse.json(
