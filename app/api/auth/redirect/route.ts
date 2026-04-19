@@ -23,7 +23,7 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const userCode = stateData.user_code;
+    const userCode = (stateData as any).user_code;
     const cache = await Cache.get(userCode);
 
     if (!cache) {
