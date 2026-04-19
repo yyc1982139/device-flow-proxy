@@ -1,0 +1,55 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { Cache } from '@/lib/cache';
+import { BASE_URL, AUTHORIZATION_ENDPOINT, TOKEN_ENDPOINT, LIMIT_REQUESTS_PER_MINUTE } from '@/lib/config';
+import { generateState, generatePkceChallenge } from '@/lib/cache';
+
+export async function GET(request: NextRequest) {
+  try {
+    const searchParams = request.nextUrl.searchParams;
+    const code = searchParams.get('code');
+
+    if (!code) {
+      return NextResponse.json(
+        { error: 'invalid_request', error_description: 'No code was entered' },
+        { status: 400 }
+      );
+    }
+
+    const userCode = searchParams.get('code')!.replace(/-/g, '').toUpperCase();
+    const cache = await Cache.get(userCode);
+
+    if (!cache) {
+      return NextResponse.json(
+        { error: 'invalid_request', error_description: 'Code not found' },
+        { status: 400 }
+      );
+    }
+
+    const state = generateState();
+    await Cache.set(`state:${state}`, { user_code: userCode, timestamp: Date.now() }, 300);
+
+    const pkceChallenge = await generatePkceChallenge(cache.pkce_verifier);
+
+    const queryParams = new URLSearchParams({
+      response_type: 'code',
+      client_id: cache.client_id,
+      redirect_uri: `${BASE_URL}/api/auth/redirect`,
+      state,
+      code_challenge: pkceChallenge,
+      code_challenge_method: 'S256',
+    });
+
+    if (cache.scope) {
+      queryParams.set('scope', cache.scope);
+    }
+
+    const redirectUrl = `${AUTHORIZATION_ENDPOINT}?${queryParams.toString()}`;
+    return NextResponse.redirect(redirectUrl);
+  } catch (error) {
+    console.error('Error in /api/verify:', error);
+    return NextResponse.json(
+      { error: 'server_error', error_description: 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
