@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Cache } from '@/lib/cache';
-import { BASE_URL, AUTHORIZATION_ENDPOINT, TOKEN_ENDPOINT, LIMIT_REQUESTS_PER_MINUTE } from '@/lib/config';
+import { BASE_URL, AUTHORIZATION_ENDPOINT } from '@/lib/config';
 import { generateState, generatePkceChallenge } from '@/lib/cache';
+import { DeviceCacheEntry, StateCacheEntry } from '@/lib/cache';
 
 export async function GET(request: NextRequest) {
   try {
@@ -16,7 +17,7 @@ export async function GET(request: NextRequest) {
     }
 
     const userCode = searchParams.get('code')!.replace(/-/g, '').toUpperCase();
-    const cache = await Cache.get(userCode);
+    const cache = await Cache.get(userCode) as DeviceCacheEntry | null;
 
     if (!cache) {
       return NextResponse.json(
@@ -26,7 +27,7 @@ export async function GET(request: NextRequest) {
     }
 
     const state = generateState();
-    await Cache.set(`state:${state}`, { user_code: userCode, timestamp: Date.now() }, 300);
+    await Cache.set(`state:${state}`, { user_code: userCode, timestamp: Date.now() } as StateCacheEntry, 300);
 
     const pkceChallenge = await generatePkceChallenge(cache.pkce_verifier);
 
