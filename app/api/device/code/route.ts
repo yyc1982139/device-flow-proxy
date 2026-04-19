@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Cache, generateDeviceCode, generateUserCode, generatePkceVerifier } from '@/lib/cache';
 import { BASE_URL, LIMIT_REQUESTS_PER_MINUTE } from '@/lib/config';
+import { DeviceCacheEntry } from '@/lib/cache';
 
 export async function POST(request: NextRequest) {
   try {
@@ -20,7 +21,7 @@ export async function POST(request: NextRequest) {
     const pkceVerifier = generatePkceVerifier();
     const userCode = generateUserCode();
 
-    const cacheData = {
+    const cacheData: DeviceCacheEntry = {
       client_id: clientId,
       client_secret: clientSecret || undefined,
       scope: scope || undefined,
@@ -30,7 +31,7 @@ export async function POST(request: NextRequest) {
 
     const userCodeKey = userCode.replace(/-/g, '').toUpperCase();
     await Cache.set(userCodeKey, cacheData, 300);
-    await Cache.set(deviceCode, { timestamp: Date.now(), status: 'pending' }, 300);
+    await Cache.set(deviceCode, { timestamp: Date.now(), status: 'pending' } as DeviceCacheEntry, 300);
 
     const interval = Math.round(60 / LIMIT_REQUESTS_PER_MINUTE);
 
