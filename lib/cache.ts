@@ -1,6 +1,10 @@
 import { Redis } from '@upstash/redis';
 import { UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN } from '@/lib/config';
 
+declare global {
+  var __device_flow_cache: Map<string, { data: unknown; expiresAt: number }> | undefined;
+}
+
 function generateDeviceCode(): string {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
@@ -111,7 +115,8 @@ class CacheStore {
       });
     } else {
       // Fallback to in-memory for local development
-      const store = globalThis.__device_flow_cache || (globalThis.__device_flow_cache = new Map());
+      const store = globalThis.__device_flow_cache ?? new Map<string, { data: unknown; expiresAt: number }>();
+      globalThis.__device_flow_cache = store;
       store.set(key, {
         data,
         expiresAt: Date.now() + ttlSeconds * 1000,
@@ -125,7 +130,8 @@ class CacheStore {
       return data ? JSON.parse(data) : null;
     } else {
       // Fallback to in-memory for local development
-      const store = globalThis.__device_flow_cache || (globalThis.__device_flow_cache = new Map());
+      const store = globalThis.__device_flow_cache ?? new Map<string, { data: unknown; expiresAt: number }>();
+      globalThis.__device_flow_cache = store;
       const entry = store.get(key);
       if (!entry) return null;
       if (Date.now() > entry.expiresAt) {
@@ -140,7 +146,8 @@ class CacheStore {
     if (this.redis) {
       await this.redis.del(key);
     } else {
-      const store = globalThis.__device_flow_cache || (globalThis.__device_flow_cache = new Map());
+      const store = globalThis.__device_flow_cache ?? new Map<string, { data: unknown; expiresAt: number }>();
+      globalThis.__device_flow_cache = store;
       store.delete(key);
     }
   }
@@ -149,7 +156,8 @@ class CacheStore {
     if (this.redis) {
       return await this.redis.incr(key);
     } else {
-      const store = globalThis.__device_flow_cache || (globalThis.__device_flow_cache = new Map());
+      const store = globalThis.__device_flow_cache ?? new Map<string, { data: unknown; expiresAt: number }>();
+      globalThis.__device_flow_cache = store;
       const entry = store.get(key);
       if (!entry) {
         store.set(key, {
@@ -168,7 +176,8 @@ class CacheStore {
     if (this.redis) {
       await this.redis.expire(key, ttlSeconds);
     } else {
-      const store = globalThis.__device_flow_cache || (globalThis.__device_flow_cache = new Map());
+      const store = globalThis.__device_flow_cache ?? new Map<string, { data: unknown; expiresAt: number }>();
+      globalThis.__device_flow_cache = store;
       const entry = store.get(key);
       if (entry) {
         entry.expiresAt = Date.now() + ttlSeconds * 1000;
