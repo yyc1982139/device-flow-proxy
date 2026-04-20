@@ -4,7 +4,11 @@ import { UPSTASH_REDIS_URL } from '@/lib/config';
 function generateDeviceCode(): string {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
-  return Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('');
+  let result = '';
+  for (let i = 0; i < array.length; i++) {
+    result += array[i].toString(16).padStart(2, '0');
+  }
+  return result;
 }
 
 function generateUserCode(): string {
@@ -12,7 +16,11 @@ function generateUserCode(): string {
   const randomPart = (length: number) => {
     const array = new Uint8Array(length);
     crypto.getRandomValues(array);
-    return Array.from(array, (b) => chars[b % chars.length]).join('');
+    let result = '';
+    for (let i = 0; i < array.length; i++) {
+      result += chars[array[i] % chars.length];
+    }
+    return result;
   };
   return `${randomPart(4)}-${randomPart(4)}`;
 }
@@ -20,27 +28,45 @@ function generateUserCode(): string {
 function generateState(): string {
   const array = new Uint8Array(16);
   crypto.getRandomValues(array);
-  return Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('');
+  let result = '';
+  for (let i = 0; i < array.length; i++) {
+    result += array[i].toString(16).padStart(2, '0');
+  }
+  return result;
 }
 
 function generatePkceVerifier(): string {
   const array = new Uint8Array(32);
   crypto.getRandomValues(array);
-  return Array.from(array, (b) => b.toString(16).padStart(2, '0')).join('');
+  let result = '';
+  for (let i = 0; i < array.length; i++) {
+    result += array[i].toString(16).padStart(2, '0');
+  }
+  return result;
 }
 
 async function generatePkceChallenge(verifier: string): Promise<string> {
   const encoder = new TextEncoder();
   const data = encoder.encode(verifier);
   const hash = await crypto.subtle.digest('SHA-256', data);
-  return btoa(String.fromCharCode(...new Uint8Array(hash)))
+  const uint8Array = new Uint8Array(hash);
+  let binary = '';
+  for (let i = 0; i < uint8Array.length; i++) {
+    binary += String.fromCharCode(uint8Array[i]);
+  }
+  return btoa(binary)
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=/g, '');
 }
 
 function base64UrlEncode(data: ArrayBuffer): string {
-  return btoa(String.fromCharCode(...new Uint8Array(data)))
+  const uint8Array = new Uint8Array(data);
+  let binary = '';
+  for (let i = 0; i < uint8Array.length; i++) {
+    binary += String.fromCharCode(uint8Array[i]);
+  }
+  return btoa(binary)
     .replace(/\+/g, '-')
     .replace(/\//g, '_')
     .replace(/=/g, '');
