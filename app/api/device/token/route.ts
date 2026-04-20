@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { Cache } from '@/lib/cache';
 import { LIMIT_REQUESTS_PER_MINUTE } from '@/lib/config';
 import { DeviceCacheEntry } from '@/lib/cache';
-
+export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.formData();
