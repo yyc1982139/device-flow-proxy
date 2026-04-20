@@ -1,5 +1,5 @@
 import { Redis } from '@upstash/redis';
-import { UPSTASH_REDIS_URL } from '@/lib/config';
+import { UPSTASH_REDIS_REST_URL } from '@/lib/config';
 
 function generateDeviceCode(): string {
   const array = new Uint8Array(32);
@@ -94,7 +94,14 @@ class CacheStore {
   private redis: Redis | null;
 
   constructor() {
-    this.redis = UPSTASH_REDIS_URL ? new Redis({ url: UPSTASH_REDIS_URL }) : null;
+    // 同时校验 url + token 都存在才创建实例
+    const hasRedisEnv = UPSTASH_REDIS_REST_URL && UPSTASH_REDIS_REST_TOKEN;
+    this.redis = hasRedisEnv 
+      ? new Redis({
+          url: UPSTASH_REDIS_REST_URL,
+          token: UPSTASH_REDIS_REST_TOKEN
+        }) 
+      : null;
   }
 
   async set(key: string, data: CacheEntry, ttlSeconds: number): Promise<void> {
