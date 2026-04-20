@@ -1,13 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Cache, generateDeviceCode, generateUserCode, generatePkceVerifier } from '@/lib/cache';
-import { BASE_URL, LIMIT_REQUESTS_PER_MINUTE } from '@/lib/config';
+import { BASE_URL, LIMIT_REQUESTS_PER_MINUTE, CLIENT_ID, CLIENT_SECRET } from '@/lib/config';
 import { DeviceCacheEntry } from '@/lib/cache';
 export const dynamic = 'force-dynamic';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.formData();
-    const clientId = body.get('client_id') as string;
-    const clientSecret = body.get('client_secret') as string | null;
+    const clientId = CLIENT_ID;
+    const clientSecret = CLIENT_SECRET;
     const scope = body.get('scope') as string | null;
 
     if (!clientId) {
