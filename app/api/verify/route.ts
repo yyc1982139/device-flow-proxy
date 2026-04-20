@@ -3,7 +3,7 @@ import { Cache } from '@/lib/cache';
 import { BASE_URL, AUTHORIZATION_ENDPOINT } from '@/lib/config';
 import { generateState, generatePkceChallenge } from '@/lib/cache';
 import { DeviceCacheEntry, StateCacheEntry } from '@/lib/cache';
-
+export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
