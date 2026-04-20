@@ -1,5 +1,5 @@
 import { Redis } from '@upstash/redis';
-import { UPSTASH_REDIS_REST_URL } from '@/lib/config';
+import { UPSTASH_REDIS_REST_URL, UPSTASH_REDIS_REST_TOKEN } from '@/lib/config';
 
 function generateDeviceCode(): string {
   const array = new Uint8Array(32);
