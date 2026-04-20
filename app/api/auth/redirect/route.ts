@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Cache } from '@/lib/cache';
-import { BASE_URL, TOKEN_ENDPOINT } from '@/lib/config';
+import { BASE_URL, TOKEN_ENDPOINT, CLIENT_ID, CLIENT_SECRET } from '@/lib/config';
 import { StateCacheEntry, DeviceCacheEntry } from '@/lib/cache';
 export const dynamic = 'force-dynamic';
 export async function GET(request: NextRequest) {
@@ -38,13 +38,10 @@ export async function GET(request: NextRequest) {
       grant_type: 'authorization_code',
       code,
       redirect_uri: `${BASE_URL}/api/auth/redirect`,
-      client_id: cache.client_id,
+      client_id: CLIENT_ID,
+      client_secret: CLIENT_SECRET!,
       code_verifier: cache.pkce_verifier,
     });
-
-    if (cache.client_secret) {
-      params.set('client_secret', cache.client_secret);
-    }
 
     const tokenResponse = await fetch(TOKEN_ENDPOINT, {
       method: 'POST',
