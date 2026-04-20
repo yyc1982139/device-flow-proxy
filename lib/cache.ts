@@ -110,7 +110,7 @@ class CacheStore {
 
   async set(key: string, data: CacheEntry, ttlSeconds: number): Promise<void> {
     if (this.redis) {
-      await this.redis.set(key, JSON.stringify(data), {
+      await this.redis.set(key, data, {
         ex: ttlSeconds,
       });
     } else {
@@ -126,8 +126,8 @@ class CacheStore {
 
   async get(key: string): Promise<CacheEntry | null> {
     if (this.redis) {
-      const data = await this.redis.get<string>(key);
-      return data ? JSON.parse(data) : null;
+      const data = await this.redis.get<CacheEntry>(key);
+      return data;
     } else {
       // Fallback to in-memory for local development
       const store = globalThis.__device_flow_cache ?? new Map<string, { data: unknown; expiresAt: number }>();
