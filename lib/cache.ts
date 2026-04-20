@@ -138,7 +138,7 @@ class CacheStore {
         store.delete(key);
         return null;
       }
-      return entry.data;
+      return entry.data as CacheEntry;
     }
   }
 
