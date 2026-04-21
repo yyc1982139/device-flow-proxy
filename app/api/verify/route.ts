@@ -1,17 +1,34 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { Cache } from '@/lib/cache';
-import { BASE_URL, AUTHORIZATION_ENDPOINT } from '@/lib/config';
+import { BASE_URL, AUTHORIZATION_ENDPOINT, DEVICE_PASSWORD } from '@/lib/config';
 import { generateState, generatePkceChallenge } from '@/lib/cache';
 import { DeviceCacheEntry, StateCacheEntry } from '@/lib/cache';
+
 export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     const searchParams = request.nextUrl.searchParams;
     const code = searchParams.get('code');
+    const password = searchParams.get('password');
 
     if (!code) {
       return NextResponse.json(
         { error: 'invalid_request', error_description: 'No code was entered' },
+        { status: 400 }
+      );
+    }
+
+    if (!password) {
+      return NextResponse.json(
+        { error: 'invalid_request', error_description: 'No password was entered' },
+        { status: 400 }
+      );
+    }
+
+    if (DEVICE_PASSWORD && password !== DEVICE_PASSWORD) {
+      return NextResponse.json(
+        { error: 'invalid_request', error_description: 'Incorrect password' },
         { status: 400 }
       );
     }
