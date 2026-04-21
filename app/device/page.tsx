@@ -7,6 +7,7 @@ function DeviceContent() {
   const searchParams = useSearchParams();
   const initialCode = searchParams.get('code') || '';
   const [code, setCode] = useState(initialCode);
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -18,7 +19,12 @@ function DeviceContent() {
       return;
     }
 
-    window.location.href = `/api/verify?code=${code}`;
+    if (!password) {
+      setError('Please enter the verification password');
+      return;
+    }
+
+    window.location.href = `/api/verify?code=${code}&password=${encodeURIComponent(password)}`;
   };
 
   return (
@@ -39,6 +45,17 @@ function DeviceContent() {
             placeholder="XXXX-XXXX"
             maxLength={9}
             autoFocus
+          />
+        </div>
+        <div className="code-input-group">
+          <label htmlFor="password">Verification Password</label>
+          <input
+            type="password"
+            id="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Enter password"
+            required
           />
         </div>
         <button type="submit">Continue</button>
